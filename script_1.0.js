@@ -34,45 +34,48 @@ function render() {
       if (val === 0) {
         tile.classList.add("empty");
       } else {
-        tile.style.backgroundImage = `url('images/${val}.jpg')`;
+        tile.style.backgroundImage = `url(images/${val}.jpg)`;
         tile.addEventListener("click", () => tryMove(row, col));
 
-        // Touch support
+        // 添加触摸滑动支持
         let touchStartX, touchStartY;
         tile.addEventListener("touchstart", (e) => {
-          e.preventDefault();
-          const touch = e.touches[0];
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
-        }, { passive: false });
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        });
 
         tile.addEventListener("touchend", (e) => {
-          e.preventDefault();
-          const touch = e.changedTouches[0];
-          const dx = touch.clientX - touchStartX;
-          const dy = touch.clientY - touchStartY;
+        const touch = e.changedTouches[0];
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
 
-          if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+        // 如果滑动距离太短就忽略
+        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
 
-          let targetRow = row;
-          let targetCol = col;
+        let targetRow = row;
+        let targetCol = col;
 
-          if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) targetCol++;
-            else targetCol--;
-          } else {
-            if (dy > 0) targetRow++;
-            else targetRow--;
-          }
+        if (Math.abs(dx) > Math.abs(dy)) {
+            // 水平滑动
+            if (dx > 0) targetCol++; // 向右滑
+            else targetCol--;        // 向左滑
+        } else {
+            // 垂直滑动
+            if (dy > 0) targetRow++; // 向下滑
+            else targetRow--;        // 向上滑
+        }
 
-          if (
+        // 尝试移动滑动目标方向的 tile
+        if (
             targetRow >= 0 && targetRow < gridSize &&
             targetCol >= 0 && targetCol < gridSize &&
             board[targetRow][targetCol] === 0
-          ) {
+        ) {
             tryMove(targetRow, targetCol);
-          }
-        }, { passive: false });
+        }
+        });
+
       }
       puzzle.appendChild(tile);
     }
@@ -87,7 +90,7 @@ function tryMove(row, col) {
     emptyRow = row;
     emptyCol = col;
     render();
-    if (checkWin()) alert("恭喜您成功解决华容道！");
+    if (checkWin()) alert("\u606d\u559c\u60a8\u6210\u529f\u89e3\u51b3\u534e\u5bb9\u9053！");
   }
 }
 
