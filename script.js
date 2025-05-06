@@ -9,6 +9,7 @@ let touchStartCol = null;
 let currentUserId = null;
 let moveCount = 0;
 let startTime = null;
+let timerInterval = null;
 
 function generateBoard() {
   const saved = loadBoardFromStorage(currentUserId);
@@ -18,10 +19,10 @@ function generateBoard() {
     emptyCol = saved.emptyCol;
     moveCount = saved.moveCount || 0;
     startTime = saved.startTime || Date.now();
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    const min = Math.floor(elapsed / 60);
-    const sec = elapsed % 60;
-    alert(`欢迎回来 ${currentUserId}！\n上次操作时间：${saved.lastPlayed || '未知'}\n累计游戏用时：${min}分${sec}秒\n已用步数：${moveCount}`);
+    updateStatus();
+    document.getElementById("welcomeText").innerText = `欢迎回来 ${currentUserId}`;
+    document.getElementById("statsText").innerText = `上次时间: ${saved.lastPlayed || '未知'}\n步数: ${moveCount}`;
+    document.getElementById("infoModal").style.display = "flex";
     return;
   }
   moveCount = 0;
@@ -62,6 +63,7 @@ function render() {
       puzzle.appendChild(tile);
     }
   }
+  updateStatus();
   saveBoardToStorage(currentUserId);
 }
 
@@ -75,6 +77,7 @@ function tryMove(row, col) {
     moveCount++;
     render();
     if (checkWin()) {
+      clearInterval(timerInterval);
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       const min = Math.floor(elapsed / 60);
       const sec = elapsed % 60;
@@ -95,6 +98,13 @@ function checkWin() {
   return true;
 }
 
+function updateStatus() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const min = Math.floor(elapsed / 60);
+  const sec = elapsed % 60;
+  document.getElementById("statusBar").innerText = `ID: ${currentUserId} ｜ 步数: ${moveCount} ｜ 用时: ${min}分${sec}秒`;
+}
+
 function saveBoardToStorage(id) {
   if (!id) return;
   const data = {
@@ -113,3 +123,133 @@ function loadBoardFromStorage(id) {
   const saved = localStorage.getItem("puzzle_" + id);
   return saved ? JSON.parse(saved) : null;
 }
+
+function setupTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateStatus, 1000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.createElement("div");
+  modal.id = "idModal";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2>请输入你的ID</h2>
+      <input type="text" id="userIdInput" placeholder="例如：rita123">
+      <button id="startGameBtn">开始游戏</button>
+    </div>
+  `;
+  const infoModal = document.createElement("div");
+  infoModal.id = "infoModal";
+  infoModal.innerHTML = `
+    <div class="modal-content">
+      <h3 id="welcomeText"></h3>
+      <pre id="statsText"></pre>
+      <button onclick="document.getElementById('infoModal').style.display='none';setupTimer();render();">继续游戏</button>
+    </div>
+  `;
+  modal.className = infoModal.className = "modal";
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .modal {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    #userIdInput {
+      padding: 10px;
+      font-size: 1em;
+      margin-top: 10px;
+      width: 200px;
+    }
+    .modal-content button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #ff90c2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #statusBar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(255,255,255,0.6);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+  `;
+
+  const status = document.createElement("div");
+  status.id = "statusBar";
+  document.body.appendChild(status);
+
+  document.head.appendChild(style);
+  document.body.appendChild(modal);
+  document.body.appendChild(infoModal);
+
+  document.getElementById("startGameBtn").onclick = () => {
+    const input = document.getElementById("userIdInput").value.trim();
+    if (input) {
+      currentUserId = input;
+      document.getElementById("idModal").style.display = "none";
+      generateBoard();
+      render();
+      setupTimer();
+    } else {
+      alert("请输入有效的 ID");
+    }
+  };
+
+  const puzzle = document.getElementById("puzzle");
+  puzzle.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+
+    const target = document.elementFromPoint(touchStartX, touchStartY);
+    if (target && target.classList.contains("tile") && !target.classList.contains("empty")) {
+      touchStartRow = parseInt(target.dataset.row);
+      touchStartCol = parseInt(target.dataset.col);
+    } else {
+      touchStartRow = null;
+      touchStartCol = null;
+    }
+  }, { passive: false });
+
+  puzzle.addEventListener("touchend", (e) => {
+    if (touchStartRow === null) return;
+
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+
+    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+    let targetRow = touchStartRow;
+    let targetCol = touchStartCol;
+
+    if (
+      targetRow >= 0 && targetRow < gridSize &&
+      targetCol >= 0 && targetCol < gridSize &&
+      board[targetRow][targetCol] === 0
+    ) {
+      tryMove(targetRow, targetCol);
+    }
+  }, { passive: false });
+});
