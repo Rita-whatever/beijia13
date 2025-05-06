@@ -2,6 +2,10 @@ const gridSize = 6;
 let board = [];
 let emptyRow = gridSize - 1;
 let emptyCol = gridSize - 1;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartRow = null;
+let touchStartCol = null;
 
 function generateBoard() {
   let nums = [...Array(gridSize * gridSize - 1).keys()].map(n => n + 1);
@@ -29,55 +33,62 @@ function render() {
       const val = board[row][col];
       const tile = document.createElement("div");
       tile.classList.add("tile");
+      tile.dataset.row = row;
+      tile.dataset.col = col;
       if (val === 0) {
         tile.classList.add("empty");
       } else {
         tile.style.backgroundImage = `url('images/${val}.jpg')`;
         tile.addEventListener("click", () => tryMove(row, col));
-
-        // Touch support with event delegation
-        let touchStartX, touchStartY;
-        tile.addEventListener("touchstart", (e) => {
-          e.preventDefault();
-          const touch = e.touches[0];
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
-        }, { passive: false });
-
-        tile.addEventListener("touchend", (e) => {
-          e.preventDefault();
-          const touch = e.changedTouches[0];
-          const dx = touch.clientX - touchStartX;
-          const dy = touch.clientY - touchStartY;
-
-          if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-          let targetRow = row;
-          let targetCol = col;
-
-          if (Math.abs(dx) > Math.abs(dy)) {
-            // horizontal swipe
-            if (dx > 0) targetCol++;
-            else targetCol--;
-          } else {
-            // vertical swipe
-            if (dy > 0) targetRow++;
-            else targetRow--;
-          }
-
-          if (
-            targetRow >= 0 && targetRow < gridSize &&
-            targetCol >= 0 && targetCol < gridSize &&
-            board[targetRow][targetCol] === 0
-          ) {
-            tryMove(targetRow, targetCol);
-          }
-        }, { passive: false });
       }
       puzzle.appendChild(tile);
     }
   }
 }
+
+// 监听 touchstart + touchend 在整个 puzzle 区域上
+const puzzle = document.getElementById("puzzle");
+puzzle.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+
+  const target = document.elementFromPoint(touchStartX, touchStartY);
+  if (target && target.classList.contains("tile") && !target.classList.contains("empty")) {
+    touchStartRow = parseInt(target.dataset.row);
+    touchStartCol = parseInt(target.dataset.col);
+  } else {
+    touchStartRow = null;
+    touchStartCol = null;
+  }
+}, { passive: false });
+
+puzzle.addEventListener("touchend", (e) => {
+  if (touchStartRow === null) return;
+
+  const touch = e.changedTouches[0];
+  const dx = touch.clientX - touchStartX;
+  const dy = touch.clientY - touchStartY;
+
+  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+  let targetRow = touchStartRow;
+  let targetCol = touchStartCol;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    targetCol += dx > 0 ? 1 : -1;
+  } else {
+    targetRow += dy > 0 ? 1 : -1;
+  }
+
+  if (
+    targetRow >= 0 && targetRow < gridSize &&
+    targetCol >= 0 && targetCol < gridSize &&
+    board[targetRow][targetCol] === 0
+  ) {
+    tryMove(targetRow, targetCol);
+  }
+}, { passive: false });
 
 function tryMove(row, col) {
   if ((Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
