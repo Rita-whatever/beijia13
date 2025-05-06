@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
   modal.innerHTML = `
     <div class="modal-content">
       <h2>请输入你的ID</h2>
-      <input type="text" id="userIdInput" placeholder="例如：rita123">
+      <input type="text" id="userIdInput" placeholder="例如：alo123">
       <button id="startGameBtn">开始游戏</button>
     </div>
   `;

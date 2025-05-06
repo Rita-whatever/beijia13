@@ -1,53 +1,42 @@
 /* style.css */
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    /* background-color: #fce4ec; */
-    background-image: url('images/background.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-  }
-  
-  #puzzle {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 4px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 4px;
-    border-radius: 8px;
-    box-sizing: border-box;
-  
-    /* 响应式缩放：手机占满，电脑不会太大 */
-    width: 90vmin;
-    height: 90vmin;
-    max-width: 500px;
-    max-height: 500px;
-    touch-action: none;
-  }
-  
-  
-  .tile {
-    width: 100%;
-    aspect-ratio: 1;
-    background-size: cover;
-    background-position: center;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  
-  .tile:hover {
-    transform: scale(1.03);
-  }
-  
-  .empty {
-    background-color: white;
-  }
-  
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-image: url('images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+#puzzle {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  width: min(90vmin, 500px);
+  height: min(90vmin, 500px);
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.tile {
+  width: 100%;
+  aspect-ratio: 1;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.tile:hover {
+  transform: scale(1.03);
+}
+.empty {
+  background-color: white;
+}
