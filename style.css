@@ -1,39 +1,45 @@
 /* style.css */
 
-body {
-  background-color: #fce4ec;
-  font-family: sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
-
-#puzzle {
-  display: grid;
-  grid-template-columns: repeat(6, 80px);
-  grid-template-rows: repeat(6, 80px);
-  gap: 4px;
-  background: #444;
-  padding: 4px;
-  border-radius: 8px;
-}
-
-.tile {
-  width: 80px;
-  height: 80px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.tile:hover {
-  transform: scale(1.03);
-}
-
-.empty {
-  background-color: white;
-}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #fce4ec;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  #puzzle {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 4px;
+    background: #444;
+    padding: 4px;
+    border-radius: 8px;
+    width: 96vw;
+    max-width: 600px;
+    aspect-ratio: 1;
+  }
+  
+  .tile {
+    width: 100%;
+    aspect-ratio: 1;
+    background-size: cover;
+    background-position: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .tile:hover {
+    transform: scale(1.03);
+  }
+  
+  .empty {
+    background-color: white;
+  }
+  
