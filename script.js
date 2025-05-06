@@ -1,5 +1,3 @@
-// script.js
-
 const gridSize = 6;
 let board = [];
 let emptyRow = gridSize - 1;
@@ -37,7 +35,7 @@ function render() {
         tile.style.backgroundImage = `url('images/${val}.jpg')`;
         tile.addEventListener("click", () => tryMove(row, col));
 
-        // Touch support
+        // Touch support with event delegation
         let touchStartX, touchStartY;
         tile.addEventListener("touchstart", (e) => {
           e.preventDefault();
@@ -58,9 +56,11 @@ function render() {
           let targetCol = col;
 
           if (Math.abs(dx) > Math.abs(dy)) {
+            // horizontal swipe
             if (dx > 0) targetCol++;
             else targetCol--;
           } else {
+            // vertical swipe
             if (dy > 0) targetRow++;
             else targetRow--;
           }
