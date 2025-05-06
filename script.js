@@ -46,49 +46,51 @@ function render() {
   }
 }
 
-// 监听 touchstart + touchend 在整个 puzzle 区域上
-const puzzle = document.getElementById("puzzle");
-puzzle.addEventListener("touchstart", (e) => {
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
+document.addEventListener("DOMContentLoaded", () => {
+  const puzzle = document.getElementById("puzzle");
 
-  const target = document.elementFromPoint(touchStartX, touchStartY);
-  if (target && target.classList.contains("tile") && !target.classList.contains("empty")) {
-    touchStartRow = parseInt(target.dataset.row);
-    touchStartCol = parseInt(target.dataset.col);
-  } else {
-    touchStartRow = null;
-    touchStartCol = null;
-  }
-}, { passive: false });
+  puzzle.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
 
-puzzle.addEventListener("touchend", (e) => {
-  if (touchStartRow === null) return;
+    const target = document.elementFromPoint(touchStartX, touchStartY);
+    if (target && target.classList.contains("tile") && !target.classList.contains("empty")) {
+      touchStartRow = parseInt(target.dataset.row);
+      touchStartCol = parseInt(target.dataset.col);
+    } else {
+      touchStartRow = null;
+      touchStartCol = null;
+    }
+  }, { passive: false });
 
-  const touch = e.changedTouches[0];
-  const dx = touch.clientX - touchStartX;
-  const dy = touch.clientY - touchStartY;
+  puzzle.addEventListener("touchend", (e) => {
+    if (touchStartRow === null) return;
 
-  if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
 
-  let targetRow = touchStartRow;
-  let targetCol = touchStartCol;
+    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
 
-  if (Math.abs(dx) > Math.abs(dy)) {
-    targetCol += dx > 0 ? 1 : -1;
-  } else {
-    targetRow += dy > 0 ? 1 : -1;
-  }
+    let targetRow = touchStartRow;
+    let targetCol = touchStartCol;
 
-  if (
-    targetRow >= 0 && targetRow < gridSize &&
-    targetCol >= 0 && targetCol < gridSize &&
-    board[targetRow][targetCol] === 0
-  ) {
-    tryMove(targetRow, targetCol);
-  }
-}, { passive: false });
+    if (Math.abs(dx) > Math.abs(dy)) {
+      targetCol += dx > 0 ? 1 : -1;
+    } else {
+      targetRow += dy > 0 ? 1 : -1;
+    }
+
+    if (
+      targetRow >= 0 && targetRow < gridSize &&
+      targetCol >= 0 && targetCol < gridSize &&
+      board[targetRow][targetCol] === 0
+    ) {
+      tryMove(targetRow, targetCol);
+    }
+  }, { passive: false });
+});
 
 function tryMove(row, col) {
   if ((Math.abs(row - emptyRow) === 1 && col === emptyCol) ||

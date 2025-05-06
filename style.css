@@ -15,15 +15,20 @@ html, body {
   #puzzle {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(6, 1fr);
     gap: 4px;
     background: #444;
     padding: 4px;
     border-radius: 8px;
-    width: 96vw;
-    max-width: 600px;
-    aspect-ratio: 1;
+    box-sizing: border-box;
+  
+    /* 响应式缩放：手机占满，电脑不会太大 */
+    width: 90vmin;
+    height: 90vmin;
+    max-width: 500px;
+    max-height: 500px;
+    touch-action: none;
   }
+  
   
   .tile {
     width: 100%;
