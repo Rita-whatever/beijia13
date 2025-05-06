@@ -100,7 +100,7 @@ function tryMove(row, col) {
     emptyRow = row;
     emptyCol = col;
     render();
-    if (checkWin()) alert("奔赴下一个十三年");
+    if (checkWin()) alert("不负携手，奔赴下一个十三年。");
   }
 }
 
