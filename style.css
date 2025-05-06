@@ -1,0 +1,39 @@
+/* style.css */
+
+body {
+  background-color: #fce4ec;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+#puzzle {
+  display: grid;
+  grid-template-columns: repeat(6, 80px);
+  grid-template-rows: repeat(6, 80px);
+  gap: 4px;
+  background: #444;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.tile {
+  width: 80px;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.tile:hover {
+  transform: scale(1.03);
+}
+
+.empty {
+  background-color: white;
+}

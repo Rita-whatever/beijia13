@@ -71,7 +71,7 @@
           if (val === 0) {
             tile.classList.add("empty");
           } else {
-            tile.style.backgroundImage = `url('${val}.jpg')`;
+            tile.style.backgroundImage = `url('images/${val}.jpg')`;
             tile.addEventListener("click", () => tryMove(row, col));
           }
           puzzle.appendChild(tile);
