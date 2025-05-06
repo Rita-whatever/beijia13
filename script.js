@@ -36,6 +36,46 @@ function render() {
       } else {
         tile.style.backgroundImage = `url(images/${val}.jpg)`;
         tile.addEventListener("click", () => tryMove(row, col));
+
+        // 添加触摸滑动支持
+        let touchStartX, touchStartY;
+        tile.addEventListener("touchstart", (e) => {
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        });
+
+        tile.addEventListener("touchend", (e) => {
+        const touch = e.changedTouches[0];
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+
+        // 如果滑动距离太短就忽略
+        if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+        let targetRow = row;
+        let targetCol = col;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            // 水平滑动
+            if (dx > 0) targetCol++; // 向右滑
+            else targetCol--;        // 向左滑
+        } else {
+            // 垂直滑动
+            if (dy > 0) targetRow++; // 向下滑
+            else targetRow--;        // 向上滑
+        }
+
+        // 尝试移动滑动目标方向的 tile
+        if (
+            targetRow >= 0 && targetRow < gridSize &&
+            targetCol >= 0 && targetCol < gridSize &&
+            board[targetRow][targetCol] === 0
+        ) {
+            tryMove(targetRow, targetCol);
+        }
+        });
+
       }
       puzzle.appendChild(tile);
     }
