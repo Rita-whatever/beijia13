@@ -11,8 +11,8 @@ let moveCount = 0;
 let startTime = null;
 let timerInterval = null;
 
-function generateBoard() {
-  // 1. 初始化为完成状态
+function generateBoard(fixedRow = null, fixedCol = null) {
+  // 初始化为完成状态
   board = [];
   let count = 1;
   for (let i = 0; i < gridSize; i++) {
@@ -25,39 +25,40 @@ function generateBoard() {
   emptyRow = gridSize - 1;
   emptyCol = gridSize - 1;
 
-  // 2. 模拟滑动进行打乱
   const directions = [
-    [0, 1],  // → right
-    [0, -1], // ← left
-    [1, 0],  // ↓ down
-    [-1, 0]  // ↑ up
+    [0, 1], [0, -1],
+    [1, 0], [-1, 0]
   ];
   let lastMove = null;
 
-  for (let i = 0; i < 150; i++) {
+  for (let step = 0; step < 150; step++) {
     const candidates = directions.filter(([dr, dc]) => {
-      const newRow = emptyRow + dr;
-      const newCol = emptyCol + dc;
-      if (
-        newRow < 0 || newRow >= gridSize ||
-        newCol < 0 || newCol >= gridSize
-      ) return false;
-      // 避免原地反复
-      if (lastMove && newRow === lastMove[0] && newCol === lastMove[1]) return false;
+      const nr = emptyRow + dr;
+      const nc = emptyCol + dc;
+      if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) return false;
+      if (lastMove && nr === lastMove[0] && nc === lastMove[1]) return false;
+      // 禁止空格移入固定块，或将固定块移动走
+      if (fixedRow !== null && fixedCol !== null) {
+        if ((nr === fixedRow && nc === fixedCol) || (emptyRow === fixedRow && emptyCol === fixedCol)) {
+          return false;
+        }
+      }
       return true;
     });
 
-    const [dr, dc] = candidates[Math.floor(Math.random() * candidates.length)];
-    const newRow = emptyRow + dr;
-    const newCol = emptyCol + dc;
+    if (candidates.length === 0) break; // 无合法方向（防止死锁）
 
-    // 交换空格和目标块
-    board[emptyRow][emptyCol] = board[newRow][newCol];
-    board[newRow][newCol] = 0;
+    const [dr, dc] = candidates[Math.floor(Math.random() * candidates.length)];
+    const nr = emptyRow + dr;
+    const nc = emptyCol + dc;
+
+    // 执行滑动
+    board[emptyRow][emptyCol] = board[nr][nc];
+    board[nr][nc] = 0;
 
     lastMove = [emptyRow, emptyCol];
-    emptyRow = newRow;
-    emptyCol = newCol;
+    emptyRow = nr;
+    emptyCol = nc;
   }
 
   moveCount = 0;
@@ -229,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
       currentUserId = input;
       document.getElementById("idModal").style.display = "none";
-      generateBoard();
+      generateBoard(2，2); // 固定起点块
       render();
       setupTimer();
     } else {
