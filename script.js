@@ -2,15 +2,43 @@ const gridSize = 6;
 let board = [];
 let emptyRow = gridSize - 1;
 let emptyCol = gridSize - 1;
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartRow = null;
-let touchStartCol = null;
 let currentUserId = null;
 let moveCount = 0;
 let startTime = null;
 let timerInterval = null;
+let totalPlayTime = 0;
 
+// 加入当前 ID 到列表（并只保留最多 10 个）
+function updateIdList(id) {
+  let idList = JSON.parse(localStorage.getItem("puzzle_id_list") || "[]");
+  idList = idList.filter(i => i !== id); // 去重
+  idList.unshift(id);
+  if (idList.length > 10) idList = idList.slice(0, 10);
+  localStorage.setItem("puzzle_id_list", JSON.stringify(idList));
+}
+
+// 查看已有 ID
+function showIdList() {
+  const idList = JSON.parse(localStorage.getItem("puzzle_id_list") || "[]");
+  if (idList.length === 0) {
+    alert("当前无任何存档 ID");
+    return;
+  }
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2>当前设备上的存档 ID 列表</h2>
+      <ul style="text-align:left; max-height:200px; overflow:auto;">
+        ${idList.map(id => `<li><b>${id}</b></li>`).join("")}
+      </ul>
+      <button onclick="this.parentElement.parentElement.remove()">关闭</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+// 初始化棋盘（若有存档则加载，否则滑动打乱，固定 2,2 位置）
 function generateBoard(fixedRow = null, fixedCol = null) {
   const saved = loadBoardFromStorage(currentUserId);
   if (saved) {
@@ -18,15 +46,17 @@ function generateBoard(fixedRow = null, fixedCol = null) {
     emptyRow = saved.emptyRow;
     emptyCol = saved.emptyCol;
     moveCount = saved.moveCount || 0;
-    startTime = saved.startTime || Date.now();
+    totalPlayTime = saved.totalPlayTime || 0;
+    startTime = Date.now();
     updateStatus();
+    updateIdList(currentUserId);
     document.getElementById("welcomeText").innerText = `欢迎回来 ${currentUserId}`;
     document.getElementById("statsText").innerText = `上次时间: ${saved.lastPlayed || '未知'}\n步数: ${moveCount}`;
     document.getElementById("infoModal").style.display = "flex";
     return;
   }
 
-  // 初始化为完成状态
+  // 初始完成状态
   board = [];
   let count = 1;
   for (let i = 0; i < gridSize; i++) {
@@ -39,32 +69,23 @@ function generateBoard(fixedRow = null, fixedCol = null) {
   emptyRow = gridSize - 1;
   emptyCol = gridSize - 1;
 
-  const directions = [
-    [0, 1], [0, -1],
-    [1, 0], [-1, 0]
-  ];
+  const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
   let lastMove = null;
 
   for (let step = 0; step < 150; step++) {
     const candidates = directions.filter(([dr, dc]) => {
-      const nr = emptyRow + dr;
-      const nc = emptyCol + dc;
+      const nr = emptyRow + dr, nc = emptyCol + dc;
       if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) return false;
       if (lastMove && nr === lastMove[0] && nc === lastMove[1]) return false;
-      // 不移动固定块
       if (fixedRow !== null && fixedCol !== null) {
-        if ((nr === fixedRow && nc === fixedCol) || (emptyRow === fixedRow && emptyCol === fixedCol)) {
-          return false;
-        }
+        if ((nr === fixedRow && nc === fixedCol) || (emptyRow === fixedRow && emptyCol === fixedCol)) return false;
       }
       return true;
     });
 
     if (candidates.length === 0) break;
-
     const [dr, dc] = candidates[Math.floor(Math.random() * candidates.length)];
-    const nr = emptyRow + dr;
-    const nc = emptyCol + dc;
+    const nr = emptyRow + dr, nc = emptyCol + dc;
 
     board[emptyRow][emptyCol] = board[nr][nc];
     board[nr][nc] = 0;
@@ -74,9 +95,9 @@ function generateBoard(fixedRow = null, fixedCol = null) {
   }
 
   moveCount = 0;
+  totalPlayTime = 0;
   startTime = Date.now();
 }
-
 
 function render() {
   const puzzle = document.getElementById("puzzle");
@@ -112,10 +133,11 @@ function tryMove(row, col) {
     render();
     if (checkWin()) {
       clearInterval(timerInterval);
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const min = Math.floor(elapsed / 60);
-      const sec = elapsed % 60;
-      alert(`🎉 恭喜您完成拼图！\n总步数：${moveCount}\n用时：${min}分${sec}秒`);
+      totalPlayTime += Date.now() - startTime;
+      saveBoardToStorage(currentUserId);
+      const min = Math.floor(totalPlayTime / 60000);
+      const sec = Math.floor((totalPlayTime % 60000) / 1000);
+      alert(`🎉 恭喜您完成拼图！\n总步数：${moveCount}\n累计用时：${min}分${sec}秒`);
     }
   }
 }
@@ -133,9 +155,11 @@ function checkWin() {
 }
 
 function updateStatus() {
-  const elapsed = Math.floor((Date.now() - startTime) / 1000);
-  const min = Math.floor(elapsed / 60);
-  const sec = elapsed % 60;
+  const now = Date.now();
+  const elapsed = now - startTime;
+  const total = totalPlayTime + elapsed;
+  const min = Math.floor(total / 60000);
+  const sec = Math.floor((total % 60000) / 1000);
   document.getElementById("statusBar").innerText = `ID: ${currentUserId} ｜ 步数: ${moveCount} ｜ 用时: ${min}分${sec}秒`;
 }
 
@@ -146,7 +170,7 @@ function saveBoardToStorage(id) {
     emptyRow,
     emptyCol,
     moveCount,
-    startTime,
+    totalPlayTime: totalPlayTime + (Date.now() - startTime),
     lastPlayed: new Date().toLocaleString()
   };
   localStorage.setItem("puzzle_" + id, JSON.stringify(data));
@@ -160,12 +184,14 @@ function loadBoardFromStorage(id) {
 
 function setupTimer() {
   if (timerInterval) clearInterval(timerInterval);
+  startTime = Date.now();
   timerInterval = setInterval(updateStatus, 1000);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const modal = document.createElement("div");
   modal.id = "idModal";
+  modal.className = "modal";
   modal.innerHTML = `
     <div class="modal-content">
       <h2>请输入你的ID</h2>
@@ -173,16 +199,20 @@ document.addEventListener("DOMContentLoaded", () => {
       <button id="startGameBtn">开始游戏</button>
     </div>
   `;
+
   const infoModal = document.createElement("div");
   infoModal.id = "infoModal";
+  infoModal.className = "modal";
   infoModal.innerHTML = `
     <div class="modal-content">
       <h3 id="welcomeText"></h3>
       <pre id="statsText"></pre>
-      <button onclick="document.getElementById('infoModal').style.display='none';setupTimer();render();">继续游戏</button>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+        <button onclick="document.getElementById('infoModal').style.display='none'; setupTimer(); render();">继续游戏</button>
+        <button onclick="showIdList()">查看已有 ID</button>
+      </div>
     </div>
   `;
-  modal.className = infoModal.className = "modal";
 
   const style = document.createElement("style");
   style.textContent = `
@@ -232,7 +262,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const status = document.createElement("div");
   status.id = "statusBar";
   document.body.appendChild(status);
-
   document.head.appendChild(style);
   document.body.appendChild(modal);
   document.body.appendChild(infoModal);
@@ -242,48 +271,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
       currentUserId = input;
       document.getElementById("idModal").style.display = "none";
-      generateBoard(2,2);
+      generateBoard(2, 2);
       render();
       setupTimer();
     } else {
       alert("请输入有效的 ID");
     }
   };
-
-  const puzzle = document.getElementById("puzzle");
-  puzzle.addEventListener("touchstart", (e) => {
-    const touch = e.touches[0];
-    touchStartX = touch.clientX;
-    touchStartY = touch.clientY;
-
-    const target = document.elementFromPoint(touchStartX, touchStartY);
-    if (target && target.classList.contains("tile") && !target.classList.contains("empty")) {
-      touchStartRow = parseInt(target.dataset.row);
-      touchStartCol = parseInt(target.dataset.col);
-    } else {
-      touchStartRow = null;
-      touchStartCol = null;
-    }
-  }, { passive: false });
-
-  puzzle.addEventListener("touchend", (e) => {
-    if (touchStartRow === null) return;
-
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartX;
-    const dy = touch.clientY - touchStartY;
-
-    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
-
-    let targetRow = touchStartRow;
-    let targetCol = touchStartCol;
-
-    if (
-      targetRow >= 0 && targetRow < gridSize &&
-      targetCol >= 0 && targetCol < gridSize &&
-      board[targetRow][targetCol] === 0
-    ) {
-      tryMove(targetRow, targetCol);
-    }
-  }, { passive: false });
 });
+
