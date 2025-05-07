@@ -12,37 +12,58 @@ let startTime = null;
 let timerInterval = null;
 
 function generateBoard() {
-  const saved = loadBoardFromStorage(currentUserId);
-  if (saved) {
-    board = saved.board;
-    emptyRow = saved.emptyRow;
-    emptyCol = saved.emptyCol;
-    moveCount = saved.moveCount || 0;
-    startTime = saved.startTime || Date.now();
-    updateStatus();
-    document.getElementById("welcomeText").innerText = `欢迎回来 ${currentUserId}`;
-    document.getElementById("statsText").innerText = `上次时间: ${saved.lastPlayed || '未知'}\n步数: ${moveCount}`;
-    document.getElementById("infoModal").style.display = "flex";
-    return;
-  }
-  moveCount = 0;
-  startTime = Date.now();
-  let nums = [...Array(gridSize * gridSize - 1).keys()].map(n => n + 1);
-  nums = nums.sort(() => Math.random() - 0.5);
-  nums.push(0);
+  // 1. 初始化为完成状态
   board = [];
+  let count = 1;
   for (let i = 0; i < gridSize; i++) {
-    board.push(nums.slice(i * gridSize, (i + 1) * gridSize));
-  }
-  for (let i = 0; i < gridSize; i++) {
+    board.push([]);
     for (let j = 0; j < gridSize; j++) {
-      if (board[i][j] === 0) {
-        emptyRow = i;
-        emptyCol = j;
-      }
+      board[i][j] = count++;
     }
   }
+  board[gridSize - 1][gridSize - 1] = 0;
+  emptyRow = gridSize - 1;
+  emptyCol = gridSize - 1;
+
+  // 2. 模拟滑动进行打乱
+  const directions = [
+    [0, 1],  // → right
+    [0, -1], // ← left
+    [1, 0],  // ↓ down
+    [-1, 0]  // ↑ up
+  ];
+  let lastMove = null;
+
+  for (let i = 0; i < 150; i++) {
+    const candidates = directions.filter(([dr, dc]) => {
+      const newRow = emptyRow + dr;
+      const newCol = emptyCol + dc;
+      if (
+        newRow < 0 || newRow >= gridSize ||
+        newCol < 0 || newCol >= gridSize
+      ) return false;
+      // 避免原地反复
+      if (lastMove && newRow === lastMove[0] && newCol === lastMove[1]) return false;
+      return true;
+    });
+
+    const [dr, dc] = candidates[Math.floor(Math.random() * candidates.length)];
+    const newRow = emptyRow + dr;
+    const newCol = emptyCol + dc;
+
+    // 交换空格和目标块
+    board[emptyRow][emptyCol] = board[newRow][newCol];
+    board[newRow][newCol] = 0;
+
+    lastMove = [emptyRow, emptyCol];
+    emptyRow = newRow;
+    emptyCol = newCol;
+  }
+
+  moveCount = 0;
+  startTime = Date.now();
 }
+
 
 function render() {
   const puzzle = document.getElementById("puzzle");
