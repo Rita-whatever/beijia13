@@ -12,6 +12,20 @@ let startTime = null;
 let timerInterval = null;
 
 function generateBoard(fixedRow = null, fixedCol = null) {
+  const saved = loadBoardFromStorage(currentUserId);
+  if (saved) {
+    board = saved.board;
+    emptyRow = saved.emptyRow;
+    emptyCol = saved.emptyCol;
+    moveCount = saved.moveCount || 0;
+    startTime = saved.startTime || Date.now();
+    updateStatus();
+    document.getElementById("welcomeText").innerText = `欢迎回来 ${currentUserId}`;
+    document.getElementById("statsText").innerText = `上次时间: ${saved.lastPlayed || '未知'}\n步数: ${moveCount}`;
+    document.getElementById("infoModal").style.display = "flex";
+    return;
+  }
+
   // 初始化为完成状态
   board = [];
   let count = 1;
@@ -37,7 +51,7 @@ function generateBoard(fixedRow = null, fixedCol = null) {
       const nc = emptyCol + dc;
       if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) return false;
       if (lastMove && nr === lastMove[0] && nc === lastMove[1]) return false;
-      // 禁止空格移入固定块，或将固定块移动走
+      // 不移动固定块
       if (fixedRow !== null && fixedCol !== null) {
         if ((nr === fixedRow && nc === fixedCol) || (emptyRow === fixedRow && emptyCol === fixedCol)) {
           return false;
@@ -46,16 +60,14 @@ function generateBoard(fixedRow = null, fixedCol = null) {
       return true;
     });
 
-    if (candidates.length === 0) break; // 无合法方向（防止死锁）
+    if (candidates.length === 0) break;
 
     const [dr, dc] = candidates[Math.floor(Math.random() * candidates.length)];
     const nr = emptyRow + dr;
     const nc = emptyCol + dc;
 
-    // 执行滑动
     board[emptyRow][emptyCol] = board[nr][nc];
     board[nr][nc] = 0;
-
     lastMove = [emptyRow, emptyCol];
     emptyRow = nr;
     emptyCol = nc;
@@ -230,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
       currentUserId = input;
       document.getElementById("idModal").style.display = "none";
-      generateBoard(2，2); // 固定起点块
+      generateBoard(2,2);
       render();
       setupTimer();
     } else {
