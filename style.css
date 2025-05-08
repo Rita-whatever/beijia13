@@ -52,28 +52,16 @@ html, body {
   box-sizing: border-box;
 }
 
-@media (max-width: 400px) {
+@media (max-width: 500px) {
   #puzzleWrapper {
-    width: clamp(350px, 23vmin, 700px);  /* ✅ 明显缩小 */
+    width: clamp(220px, 45vw, 500px);  /* ✅ 手机上显示更小，更适中 */
   }
 
   #puzzle {
-    width: 98%;
-    height: 98%;
+    width: 92%;
+    height: 92%;
   }
 }
-
-/* #puzzle {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 4px;
-  width: min(90vmin, 500px);
-  height: min(90vmin, 500px);
-  background-color: rgba(0, 0, 0, 0.377);
-  padding: 4px;
-  border-radius: 8px;
-  box-sizing: border-box;
-} */
 
 
 
