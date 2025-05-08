@@ -52,9 +52,9 @@ html, body {
   box-sizing: border-box;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 400px) {
   #puzzleWrapper {
-    width: clamp(320px, 20vmin, 700px);  /* ✅ 明显缩小 */
+    width: clamp(350px, 23vmin, 700px);  /* ✅ 明显缩小 */
   }
 
   #puzzle {
