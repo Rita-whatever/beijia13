@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
       currentUserId = input;
       document.getElementById("idModal").style.display = "none";
-      generateBoard(3, 2);
+      generateBoard(4, 2);
       render();
       setupTimer();
     } else {
