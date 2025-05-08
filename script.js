@@ -113,7 +113,7 @@ function render() {
       if (val === 0) {
         tile.classList.add("empty");
       } else {
-        tile.style.backgroundImage = `url('images/${val}.jpg')`;
+        tile.style.backgroundImage = `url('images/${val}.png')`;
         tile.addEventListener("click", () => tryMove(row, col));
       }
       puzzle.appendChild(tile);
@@ -174,14 +174,14 @@ function tryMove(row, col) {
 // [TESTING]
 
 function checkWin() {
-  // let count = 1;
-  // for (let i = 0; i < gridSize; i++) {
-  //   for (let j = 0; j < gridSize; j++) {
-  //     if (i === gridSize - 1 && j === gridSize - 1) return board[i][j] === 0;
-  //     if (board[i][j] !== count) return false;
-  //     count++;
-  //   }
-  // }
+  let count = 1;
+  for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+      if (i === gridSize - 1 && j === gridSize - 1) return board[i][j] === 0;
+      if (board[i][j] !== count) return false;
+      count++;
+    }
+  }
   return true;
 }
 
@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
       currentUserId = input;
       document.getElementById("idModal").style.display = "none";
-      generateBoard(2, 2);
+      generateBoard(3, 2);
       render();
       setupTimer();
     } else {
