@@ -26,14 +26,14 @@ html, body {
   justify-content: center;
   align-items: center;
 }
-
+/* 
 #puzzleWrapper {
-  background-image: url('images/extend_frame.png');  /* 🦋 你的蝴蝶图 */
+  background-image: url('images/extend_frame.png'); 
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: transparent;
-  width: clamp(340px, 57vmin, 1000px); /* ✅ 在不同设备上灵活缩放 */
+  width: clamp(340px, 57vmin, 1000px); 
   aspect-ratio: 1;
   display: flex;
   justify-content: center;
@@ -50,11 +50,48 @@ html, body {
   border-radius: 8px;
   padding: 4px;
   box-sizing: border-box;
+} */
+
+#puzzleWrapper {
+  position: relative;
+  width: clamp(300px, 27vw, 750px); /* 手机略小，电脑舒适 */
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-@media (max-width: 500px) {
+#puzzleWrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('images/extend_frame.png');  /* 蝴蝶图 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#puzzle {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  background-color: rgba(0, 0, 0, 0.471);
+  border-radius: 8px;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+
+@media (max-width: 800px) {
   #puzzleWrapper {
-    width: clamp(220px, 45vw, 500px);  /* ✅ 手机上显示更小，更适中 */
+    /* width: clamp(300px, 50vw, 500px); */
+    width: 90vw;
   }
 
   #puzzle {
