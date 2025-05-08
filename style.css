@@ -14,17 +14,58 @@ html, body {
   align-items: center;
   overflow: hidden;
 }
+
+#puzzleWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('images/frame2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* ✅ 关键是给 padding */
+  padding: 85px; /* 可根据边框厚度调整 frame 1 120, frame 2*/
+  width: calc(min(90vmin, 500px) + 80px);  /* = puzzle 宽度 + 2×padding */
+  height: calc(min(90vmin, 500px) + 80px); /* 同上 */
+}
+
+
 #puzzle {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 4px;
   width: min(90vmin, 500px);
   height: min(90vmin, 500px);
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.377);
   padding: 4px;
   border-radius: 8px;
   box-sizing: border-box;
 }
+
+#winText {
+  text-align: left;
+  line-height: 1.6;
+  font-size: 15px;
+  margin-top: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.win-modal-content {
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 20px 30px;
+  animation: fadeIn 0.3s ease-out;
+  margin: auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 .tile {
   width: 100%;
   aspect-ratio: 1;
