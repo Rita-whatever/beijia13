@@ -38,8 +38,8 @@ function showIdList() {
   document.body.appendChild(modal);
 }
 
-// 初始化棋盘（若有存档则加载，否则滑动打乱，固定 2,2 位置）
-function generateBoard(fixedRow = null, fixedCol = null) {
+// 初始化棋盘
+function generateBoard(fixedPositions = []) {
   const saved = loadBoardFromStorage(currentUserId);
 
   if (saved) {
@@ -74,9 +74,10 @@ function generateBoard(fixedRow = null, fixedCol = null) {
         const nr = emptyRow + dr, nc = emptyCol + dc;
         if (nr < 0 || nr >= gridSize || nc < 0 || nc >= gridSize) return false;
         if (lastMove && nr === lastMove[0] && nc === lastMove[1]) return false;
-        if (fixedRow !== null && fixedCol !== null) {
-          if ((nr === fixedRow && nc === fixedCol) || (emptyRow === fixedRow && emptyCol === fixedCol)) return false;
-        }
+        if (fixedPositions.some(([fr, fc]) =>
+          (nr === fr && nc === fc) || (emptyRow === fr && emptyCol === fc)
+        )) return false;
+        
         return true;
       });
 
@@ -315,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input) {
       currentUserId = input;
       document.getElementById("idModal").style.display = "none";
-      generateBoard(4, 2);
+      generateBoard([[4,2], [0,0], [5,0], [0,5]]);
       render();
       setupTimer();
     } else {
