@@ -4,7 +4,7 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%;
-  background-image: url('images/background.jpg');
+  background-image: url('images/background_w.JPG');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -16,7 +16,7 @@ html, body {
 }
 
 #pageBackground {
-  background-image: url('images/background.jpg'); /* 🌊 水波背景 */
+  background-image: url('images/background_w.JPG'); /* 🌊 水波背景 */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -131,7 +131,7 @@ html, body {
   background-position: center;
   border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.1s;
 }
 .tile:hover {
   transform: scale(1.03);
