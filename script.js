@@ -52,7 +52,7 @@ function showCredits() {
         <li><b>爱吃苹果mo、干吃奶盖</b> - 校对</li>
         <li><b>鹤白要开心</b> - 提供美工建议</li>
         <li><b>OpenAI ChatGPT</b> - 编程协助</li>
-        <li><b>各大媒体，闫子贝、孙佳俊本人，等其他照片原作者</b> - 致以诚挚感谢</li>
+        <li><b>各大媒体，闫子贝、孙佳俊本人，等其他照片原作者——致以诚挚感谢</b> </li>
       </ul>
       <button onclick="this.parentElement.parentElement.remove()">关闭</button>
     </div>
